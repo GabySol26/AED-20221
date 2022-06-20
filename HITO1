@@ -1,0 +1,1830 @@
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <conio.h>
+#include <windows.h>
+#include <iomanip>
+#include <functional>
+#include <stdio.h>
+#include <stdlib.h>
+#include <vector>
+#include <Windows.h>
+#include <list>
+#include <array>
+#include <queue>
+#include <string.h>
+
+using namespace std;
+
+const  int AZUL = 1; const  int VERDE = 2;
+const  int ROJO = 4; const  int BLANCO = 15;
+
+enum COLOR { RED, BLACK };
+
+typedef unsigned long ul;
+
+HANDLE SetColor(HANDLE console, int fg = FOREGROUND_RED || FOREGROUND_GREEN || FOREGROUND_BLUE || FOREGROUND_INTENSITY, int bg = 0)
+{
+	if (console == NULL)
+		console = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleTextAttribute(console, fg | bg);
+	return console;
+}
+
+void  changeColour(int color) // cambios de color con Handle
+{
+	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleTextAttribute(hConsole, color);
+}
+
+void gotoxy(int x, int y) // funcion que da movimiento a algunas otras funciones
+{
+	HANDLE hcon;
+	hcon = GetStdHandle(STD_OUTPUT_HANDLE);
+	COORD dwPos;
+	dwPos.X = x;
+	dwPos.Y = y;
+	SetConsoleCursorPosition(hcon, dwPos);
+}
+
+void menu1()
+{
+	for (int i = 5; i >= 0; i--)
+	{
+		system("CLS");
+		//gotoxy(0, i);
+		cout << "\t\t\t\t ---------------------------------" << endl;
+		cout << "\t\t\t\t|         MENU DE OPCIONES        |" << endl;
+		cout << "\t\t\t\t|  -----------------------------  |" << endl;
+		cout << "\t\t\t\t|                                 |" << endl;
+		cout << "\t\t\t\t| [1] Listar normal               |" << endl;
+		cout << "\t\t\t\t|                                 |" << endl;
+		cout << "\t\t\t\t| [2] Estructuras de Datos        |" << endl;
+		cout << "\t\t\t\t|                                 |" << endl;
+		cout << "\t\t\t\t| [3] Ordenamientos Avanzados     |" << endl;
+		cout << "\t\t\t\t|                                 |" << endl;
+		cout << "\t\t\t\t| [4] Salir                       |" << endl;
+		cout << "\t\t\t\t|                                 |" << endl;
+		cout << "\t\t\t\t ---------------------------------" << endl;
+		Sleep(8);
+	}
+}
+
+void cambio()
+{
+	int i;
+	int color[2] = { ROJO, AZUL };
+	menu1();
+
+	for (i = 0; i < 2; i++)
+	{
+		Sleep(1000);
+		system("CLS");
+		changeColour(color[i]);
+		menu1();
+		Sleep(1000);
+		system("CLS");
+		changeColour(VERDE);
+		menu1();
+	}
+	system("CLS");
+}
+
+namespace ListaPrueba
+{
+	template <class G>
+	class Node
+	{
+	public:
+		G data;
+		Node* next;
+		Node* prev;
+	};
+
+	/* A utility function to swap two elements */
+	template <typename G>
+	void swap(G* a, G* b)
+	{
+		G t = *a; *a = *b; *b = t;
+	}
+
+	// A utility function to find
+	// last node of linked list
+	template <typename G>
+	Node<G>* lastNode(Node<G>* root)
+	{
+		while (root && root->next)
+			root = root->next;
+		return root;
+	}
+
+	/* Considers last element as pivot,
+	places the pivot element at its
+	correct position in sorted array,
+	and places all smaller (smaller than
+	pivot) to left of pivot and all greater
+	elements to right of pivot */
+	template <typename G>
+	Node<G>* partition(Node<G>* l, Node<G>* h)
+	{
+		// set pivot as h element
+		G x = h->data;
+
+		// similar to i = l-1 for array implementation
+		Node<G>* i = l->prev;
+
+		// Similar to "for (int j = l; j <= h- 1; j++)"
+		for (Node<G>* j = l; j != h; j = j->next)
+		{
+			if (j->data <= x)
+			{
+				// Similar to i++ for array
+				i = (i == NULL) ? l : i->next;
+
+				swap(&(i->data), &(j->data));
+			}
+		}
+		i = (i == NULL) ? l : i->next; // Similar to i++
+		swap(&(i->data), &(h->data));
+		return i;
+	}
+
+	/* A recursive implementation
+	of quicksort for linked list */
+	template <typename G>
+	void _quickSort(Node<G>* l, Node<G>* h)
+	{
+		if (h != NULL && l != h && l != h->next)
+		{
+			Node<G>* p = partition(l, h);
+			_quickSort(l, p->prev);
+			_quickSort(p->next, h);
+		}
+	}
+
+	// The main function to sort a linked list.
+	// It mainly calls _quickSort()
+	template <typename G>
+	void quickSort(Node<G>* head)
+	{
+		// Find last node
+		Node<G>* h = lastNode(head);
+
+		// Call the recursive QuickSort
+		_quickSort(head, h);
+	}
+
+	// A utility function to print contents of arr
+	template <typename G>
+	void printList(Node<G>* head)
+	{
+		while (head)
+		{
+			cout << head->data << " ";
+			head = head->next;
+		}
+		cout << endl;
+	}
+
+	/* Function to insert a node at the
+	beginning of the Doubly Linked List */
+	template <typename G>
+	void push(Node<G>** head_ref, G new_data)
+	{
+		Node<G>* new_node = new Node<G>; /* allocate node */
+		new_node->data = new_data;
+
+		/* since we are adding at the
+		beginning, prev is always NULL */
+		new_node->prev = NULL;
+
+		/* link the old list off the new node */
+		new_node->next = (*head_ref);
+
+		/* change prev of head node to new node */
+		if ((*head_ref) != NULL) (*head_ref)->prev = new_node;
+
+		/* move the head to point to the new node */
+		(*head_ref) = new_node;
+	}
+
+};
+
+namespace ListaDoblementeEnlazada
+{
+	template <class G>
+
+	class NodoL { //Nodo
+	public:
+		NodoL<G>* sig;
+		NodoL<G>* ant;
+		G elemento;
+
+		NodoL(G elemento) {
+			this->elemento = elemento;
+			sig = ant = nullptr;
+		}
+	};
+
+	template <class G>
+
+	class Lista {
+		NodoL<G>* inicio;
+		NodoL<G>* fin;
+		size_t cantidad;
+
+	public:
+
+		Lista() {
+			inicio = fin = nullptr;
+			cantidad = 0;
+		}
+
+		void push_front(G g) {
+			NodoL<G>* nuevo = new NodoL<G>(g);
+			if (cantidad == 0) {
+				inicio = nuevo;
+				fin = nuevo;
+			}
+
+			else {
+				nuevo->sig = inicio;
+				inicio->ant = nuevo;
+				inicio = nuevo;
+			}
+			cantidad++;
+		}
+
+		void push_back(G g) {
+			NodoL<G>* nuevo = new NodoL<G>(g);
+			if (cantidad == 0) {
+				inicio = fin = nuevo;
+			}
+			else {
+				fin->sig = nuevo;
+				nuevo->ant = fin;
+				fin = nuevo;
+			}
+			cantidad++;
+		}
+
+		void print(function<void(G)> imprime)
+		{
+			NodoL<G>* aux = inicio;
+			while (aux != nullptr)
+			{
+				imprime(aux->elemento);
+				//cout << aux->elemento << " ";
+				aux = aux->sig;
+			}
+			cout << "\n";
+		}
+	};
+
+};
+
+namespace HashTable
+{
+
+	class Entity
+	{
+		ul key;
+		ul value;
+		friend class HTable;
+	public: Entity(ul k = 0, ul v = 0) :key(k), value(v) {}
+	};
+
+	class HTable {
+		array<list<Entity>, 11> container;
+	public:
+		ul getIndex(ul key) { return key % 11; }
+		void add(ul key, ul value) { container[getIndex(key)].push_back(Entity(key, value)); }
+		void display() {
+			for (size_t i = 0; i < container.size(); ++i) {//recorre el array
+				cout << i << "->";
+				/*for (list<Entity>::iterator it = container[i].begin();it != container[i].end();++it) {
+					cout <<"("<<(*it).key << "-" << (*it).value << ")-> ";
+				}*/
+				for (auto it : container[i]) {
+					cout << "(" << it.key << "-" << it.value << ")-> ";
+				}
+				cout << "\n";
+			}
+		}
+	};
+
+};
+
+namespace BArbol
+{
+
+	class BTreeNode
+	{
+		int* keys;
+		int t;
+		BTreeNode** C;
+		int n;
+		bool leaf;
+	public:
+		BTreeNode(int _t, bool _leaf);
+		void insertNonFull(int k);
+		void splitChild(int i, BTreeNode* y);
+		void traverse();
+		BTreeNode* search(int k);
+		friend class BTree;
+	};
+
+	class BTree
+	{
+		BTreeNode* root;
+		int t;
+	public:
+
+		BTree(int _t)
+		{
+			root = NULL;  t = _t;
+		}
+		void traverse()
+		{
+			if (root != NULL) root->traverse();
+		}
+		BTreeNode* search(int k)
+		{
+			return (root == NULL) ? NULL : root->search(k);
+		}
+
+		void insert(int k);
+	};
+
+	BTreeNode::BTreeNode(int t1, bool leaf1)
+	{
+		t = t1;
+		leaf = leaf1;
+		keys = new int[2 * t - 1];
+		C = new BTreeNode * [2 * t];
+		n = 0;
+	}
+
+	void BTreeNode::traverse()
+	{
+		int i;
+		for (i = 0; i < n; i++)
+		{
+			if (leaf == false)
+				C[i]->traverse();
+			cout << " " << keys[i];
+		}
+		if (leaf == false)
+			C[i]->traverse();
+	}
+
+	BTreeNode* BTreeNode::search(int k)
+	{
+		int i = 0;
+		while (i < n && k > keys[i])
+			i++;
+		if (keys[i] == k)
+			return this;
+		if (leaf == true)
+			return NULL;
+		return C[i]->search(k);
+	}
+
+	void BTree::insert(int k)
+	{
+		if (root == NULL)
+		{
+			root = new BTreeNode(t, true);
+			root->keys[0] = k;
+			root->n = 1;
+		}
+		else
+		{
+			if (root->n == 2 * t - 1)
+			{
+				BTreeNode* s = new BTreeNode(t, false);
+				s->C[0] = root;
+				s->splitChild(0, root);
+				int i = 0;
+				if (s->keys[0] < k)
+					i++;
+				s->C[i]->insertNonFull(k);
+				root = s;
+			}
+			else
+				root->insertNonFull(k);
+		}
+	}
+
+	void BTreeNode::insertNonFull(int k)
+	{
+		int i = n - 1;
+		if (leaf == true)
+		{
+			while (i >= 0 && keys[i] > k)
+			{
+				keys[i + 1] = keys[i];
+				i--;
+			}
+			keys[i + 1] = k;
+			n = n + 1;
+		}
+		else
+		{
+			while (i >= 0 && keys[i] > k)
+				i--;
+			if (C[i + 1]->n == 2 * t - 1)
+			{
+				splitChild(i + 1, C[i + 1]);
+				if (keys[i + 1] < k)
+					i++;
+			}
+			C[i + 1]->insertNonFull(k);
+		}
+	}
+
+	void BTreeNode::splitChild(int i, BTreeNode* y)
+	{
+		BTreeNode* z = new BTreeNode(y->t, y->leaf);
+		z->n = t - 1;
+		for (int j = 0; j < t - 1; j++)
+			z->keys[j] = y->keys[j + t];
+
+		if (y->leaf == false)
+		{
+			for (int j = 0; j < t; j++)
+				z->C[j] = y->C[j + t];
+		}
+
+		y->n = t - 1;
+
+		for (int j = n; j >= i + 1; j--)
+			C[j + 1] = C[j];
+
+		C[i + 1] = z;
+
+		for (int j = n - 1; j >= i; j--)
+			keys[j + 1] = keys[j];
+
+		keys[i] = y->keys[t - 1];
+
+		n = n + 1;
+	}
+
+};
+
+namespace ArbolRojoNegro
+{
+
+	class Node {
+	public:
+		int val;
+		COLOR color;
+		Node* left, * right, * parent;
+
+		Node(int val) : val(val) {
+			parent = left = right = NULL;
+
+			// Node is created during insertion
+			// Node is red at insertion
+			color = RED;
+		}
+
+		// returns pointer to uncle
+		Node* uncle() {
+			// If no parent or grandparent, then no uncle
+			if (parent == NULL or parent->parent == NULL)
+				return NULL;
+
+			if (parent->isOnLeft())
+				// uncle on right
+				return parent->parent->right;
+			else
+				// uncle on left
+				return parent->parent->left;
+		}
+
+		// check if node is left child of parent
+		bool isOnLeft() { return this == parent->left; }
+
+		// returns pointer to sibling
+		Node* sibling() {
+			// sibling null if no parent
+			if (parent == NULL)
+				return NULL;
+
+			if (isOnLeft())
+				return parent->right;
+
+			return parent->left;
+		}
+
+		// moves node down and moves given node in its place
+		void moveDown(Node* nParent) {
+			if (parent != NULL) {
+				if (isOnLeft()) {
+					parent->left = nParent;
+				}
+				else {
+					parent->right = nParent;
+				}
+			}
+			nParent->parent = parent;
+			parent = nParent;
+		}
+
+		bool hasRedChild() {
+			return (left != NULL and left->color == RED) or
+				(right != NULL and right->color == RED);
+		}
+	};
+
+	class RBTree {
+		Node* root;
+
+		// left rotates the given node
+		void leftRotate(Node* x) {
+			// new parent will be node's right child
+			Node* nParent = x->right;
+
+			// update root if current node is root
+			if (x == root)
+				root = nParent;
+
+			x->moveDown(nParent);
+
+			// connect x with new parent's left element
+			x->right = nParent->left;
+			// connect new parent's left element with node
+			// if it is not null
+			if (nParent->left != NULL)
+				nParent->left->parent = x;
+
+			// connect new parent with x
+			nParent->left = x;
+		}
+
+		void rightRotate(Node* x) {
+			// new parent will be node's left child
+			Node* nParent = x->left;
+
+			// update root if current node is root
+			if (x == root)
+				root = nParent;
+
+			x->moveDown(nParent);
+
+			// connect x with new parent's right element
+			x->left = nParent->right;
+			// connect new parent's right element with node
+			// if it is not null
+			if (nParent->right != NULL)
+				nParent->right->parent = x;
+
+			// connect new parent with x
+			nParent->right = x;
+		}
+
+		void swapColors(Node* x1, Node* x2) {
+			COLOR temp;
+			temp = x1->color;
+			x1->color = x2->color;
+			x2->color = temp;
+		}
+
+		void swapValues(Node* u, Node* v) {
+			int temp;
+			temp = u->val;
+			u->val = v->val;
+			v->val = temp;
+		}
+
+		// fix red red at given node
+		void fixRedRed(Node* x) {
+			// if x is root color it black and return
+			if (x == root) {
+				x->color = BLACK;
+				return;
+			}
+
+			// initialize parent, grandparent, uncle
+			Node* parent = x->parent, * grandparent = parent->parent,
+				* uncle = x->uncle();
+
+			if (parent->color != BLACK) {
+				if (uncle != NULL && uncle->color == RED) {
+					// uncle red, perform recoloring and recurse
+					parent->color = BLACK;
+					uncle->color = BLACK;
+					grandparent->color = RED;
+					fixRedRed(grandparent);
+				}
+				else {
+					// Else perform LR, LL, RL, RR
+					if (parent->isOnLeft()) {
+						if (x->isOnLeft()) {
+							// for left right
+							swapColors(parent, grandparent);
+						}
+						else {
+							leftRotate(parent);
+							swapColors(x, grandparent);
+						}
+						// for left left and left right
+						rightRotate(grandparent);
+					}
+					else {
+						if (x->isOnLeft()) {
+							// for right left
+							rightRotate(parent);
+							swapColors(x, grandparent);
+						}
+						else {
+							swapColors(parent, grandparent);
+						}
+
+						// for right right and right left
+						leftRotate(grandparent);
+					}
+				}
+			}
+		}
+
+		// find node that do not have a left child
+		// in the subtree of the given node
+		Node* successor(Node* x) {
+			Node* temp = x;
+
+			while (temp->left != NULL)
+				temp = temp->left;
+
+			return temp;
+		}
+
+		// find node that replaces a deleted node in BST
+		Node* BSTreplace(Node* x) {
+			// when node have 2 children
+			if (x->left != NULL and x->right != NULL)
+				return successor(x->right);
+
+			// when leaf
+			if (x->left == NULL and x->right == NULL)
+				return NULL;
+
+			// when single child
+			if (x->left != NULL)
+				return x->left;
+			else
+				return x->right;
+		}
+
+		// deletes the given node
+		void deleteNode(Node* v) {
+			Node* u = BSTreplace(v);
+
+			// True when u and v are both black
+			bool uvBlack = ((u == NULL or u->color == BLACK) and (v->color == BLACK));
+			Node* parent = v->parent;
+
+			if (u == NULL) {
+				// u is NULL therefore v is leaf
+				if (v == root) {
+					// v is root, making root null
+					root = NULL;
+				}
+				else {
+					if (uvBlack) {
+						// u and v both black
+						// v is leaf, fix double black at v
+						fixDoubleBlack(v);
+					}
+					else {
+						// u or v is red
+						if (v->sibling() != NULL)
+							// sibling is not null, make it red"
+							v->sibling()->color = RED;
+					}
+
+					// delete v from the tree
+					if (v->isOnLeft()) {
+						parent->left = NULL;
+					}
+					else {
+						parent->right = NULL;
+					}
+				}
+				delete v;
+				return;
+			}
+
+			if (v->left == NULL or v->right == NULL) {
+				// v has 1 child
+				if (v == root) {
+					// v is root, assign the value of u to v, and delete u
+					v->val = u->val;
+					v->left = v->right = NULL;
+					delete u;
+				}
+				else {
+					// Detach v from tree and move u up
+					if (v->isOnLeft()) {
+						parent->left = u;
+					}
+					else {
+						parent->right = u;
+					}
+					delete v;
+					u->parent = parent;
+					if (uvBlack) {
+						// u and v both black, fix double black at u
+						fixDoubleBlack(u);
+					}
+					else {
+						// u or v red, color u black
+						u->color = BLACK;
+					}
+				}
+				return;
+			}
+
+			// v has 2 children, swap values with successor and recurse
+			swapValues(u, v);
+			deleteNode(u);
+		}
+
+		void fixDoubleBlack(Node* x) {
+			if (x == root)
+				// Reached root
+				return;
+
+			Node* sibling = x->sibling(), * parent = x->parent;
+			if (sibling == NULL) {
+				// No sibiling, double black pushed up
+				fixDoubleBlack(parent);
+			}
+			else {
+				if (sibling->color == RED) {
+					// Sibling red
+					parent->color = RED;
+					sibling->color = BLACK;
+					if (sibling->isOnLeft()) {
+						// left case
+						rightRotate(parent);
+					}
+					else {
+						// right case
+						leftRotate(parent);
+					}
+					fixDoubleBlack(x);
+				}
+				else {
+					// Sibling black
+					if (sibling->hasRedChild()) {
+						// at least 1 red children
+						if (sibling->left != NULL and sibling->left->color == RED) {
+							if (sibling->isOnLeft()) {
+								// left left
+								sibling->left->color = sibling->color;
+								sibling->color = parent->color;
+								rightRotate(parent);
+							}
+							else {
+								// right left
+								sibling->left->color = parent->color;
+								rightRotate(sibling);
+								leftRotate(parent);
+							}
+						}
+						else {
+							if (sibling->isOnLeft()) {
+								// left right
+								sibling->right->color = parent->color;
+								leftRotate(sibling);
+								rightRotate(parent);
+							}
+							else {
+								// right right
+								sibling->right->color = sibling->color;
+								sibling->color = parent->color;
+								leftRotate(parent);
+							}
+						}
+						parent->color = BLACK;
+					}
+					else {
+						// 2 black children
+						sibling->color = RED;
+						if (parent->color == BLACK)
+							fixDoubleBlack(parent);
+						else
+							parent->color = BLACK;
+					}
+				}
+			}
+		}
+
+		// prints level order for given node
+		void levelOrder(Node* x) {
+			if (x == NULL)
+				// return if node is null
+				return;
+
+			// queue for level order
+			queue<Node*> q;
+			Node* curr;
+
+			// push x
+			q.push(x);
+
+			while (!q.empty()) {
+				// while q is not empty
+				// dequeue
+				curr = q.front();
+				q.pop();
+
+				// print node value
+				cout << curr->val << " ";
+
+				// push children to queue
+				if (curr->left != NULL)
+					q.push(curr->left);
+				if (curr->right != NULL)
+					q.push(curr->right);
+			}
+		}
+
+		// prints inorder recursively
+		void inorder(Node* x) {
+			if (x == NULL)
+				return;
+			inorder(x->left);
+			cout << x->val << " ";
+			inorder(x->right);
+		}
+
+	public:
+		// constructor
+		// initialize root
+		RBTree() { root = NULL; }
+
+		Node* getRoot() { return root; }
+
+		// searches for given value
+		// if found returns the node (used for delete)
+		// else returns the last node while traversing (used in insert)
+		Node* search(int n) {
+			Node* temp = root;
+			while (temp != NULL) {
+				if (n < temp->val) {
+					if (temp->left == NULL)
+						break;
+					else
+						temp = temp->left;
+				}
+				else if (n == temp->val) {
+					break;
+				}
+				else {
+					if (temp->right == NULL)
+						break;
+					else
+						temp = temp->right;
+				}
+			}
+
+			return temp;
+		}
+
+		// inserts the given value to tree
+		void insert(int n) {
+			Node* newNode = new Node(n);
+			if (root == NULL) {
+				// when root is null
+				// simply insert value at root
+				newNode->color = BLACK;
+				root = newNode;
+			}
+			else {
+				Node* temp = search(n);
+
+				if (temp->val == n) {
+					// return if value already exists
+					return;
+				}
+
+				// if value is not found, search returns the node
+				// where the value is to be inserted
+
+				// connect new node to correct node
+				newNode->parent = temp;
+
+				if (n < temp->val)
+					temp->left = newNode;
+				else
+					temp->right = newNode;
+
+				// fix red red voilaton if exists
+				fixRedRed(newNode);
+			}
+		}
+
+		// utility function that deletes the node with given value
+		void deleteByVal(int n) {
+			if (root == NULL)
+				// Tree is empty
+				return;
+
+			Node* v = search(n), * u;
+
+			if (v->val != n) {
+				cout << "No node found to delete with value:" << n << endl;
+				return;
+			}
+
+			deleteNode(v);
+		}
+
+		// prints inorder of the tree
+		void printInOrder() {
+			cout << "Inorder: " << endl;
+			if (root == NULL)
+				cout << "Tree is empty" << endl;
+			else
+				inorder(root);
+			cout << endl;
+		}
+
+		// prints level order of the tree
+		void printLevelOrder() {
+			cout << "Level order: " << endl;
+			if (root == NULL)
+				cout << "Tree is empty" << endl;
+			else
+				levelOrder(root);
+			cout << endl;
+		}
+	};
+
+}
+
+namespace Grafos
+{
+
+};
+
+char TChar(int x)
+{
+	char aux;
+	if (65 <= x <= 90)
+	{
+		aux = x;
+	}
+	return aux;
+}
+
+void ElementosU()
+{
+	ofstream Archivo_U;
+	Archivo_U.open("usuarios.csv");
+
+	/*
+	Archivo_U << "Nombre" << "," << "Edad" << "," << "Duracion" << "," << "Tipo" << "," << "Precio" << "," <<
+		"Ruta Partida" << "," << "Ruta Llegada" << "," << "Ubicacion Compartida" << "," << "Rating" << endl;
+	*/
+
+	for (size_t i = 0; i < 100000; i++)
+	{
+		int nomAux1 = 65 + rand() % (91 - 65); int nomAux2 = 65 + rand() % (91 - 65);
+		int nomAux3 = 65 + rand() % (91 - 65); int nomAux4 = 65 + rand() % (91 - 65);
+		int nomAux5 = 65 + rand() % (91 - 65); int nomAux6 = 65 + rand() % (91 - 65);
+
+		Archivo_U << "U" + to_string(1 + rand() % (100000 + 1 - 1)) << "," << to_string(18 + rand() % (99 + 1 - 18))
+			<< "," << to_string(1 + rand() % (60 + 1 - 1)) << "," << to_string(1 + rand() % (3 + 1 - 1)) << "," <<
+			to_string(10 + rand() % (120 + 1 - 10)) << "," << (char)TChar(nomAux1) << (char)TChar(nomAux2) <<
+			(char)TChar(nomAux3) << "," << (char)TChar(nomAux4) << (char)TChar(nomAux5) << (char)TChar(nomAux6) <<
+			"," << to_string(1 + rand() % (2 + 1 - 1)) << "," << to_string(1 + rand() % (3 + 1 - 1)) << endl;
+	}
+
+	Archivo_U.close();
+}
+
+void ElementosT()
+{
+	ofstream Archivo_T;
+	Archivo_T.open("taxistas.csv");
+
+	/*
+	Archivo_T << "Nombre" << "," << "Edad" << "," << "Placa" << "," << "Duracion" << "," << "Tipo" <<
+		"," << "Precio" << "," << "Ruta" "," << "Ubicacion Compartida" << "," << "Rating" << endl;
+	*/
+
+	for (size_t i = 0; i < 100000; i++)
+	{
+		int nomAux4 = 65 + rand() % (91 - 65); int nomAux5 = 65 + rand() % (91 - 65);
+		int nomAux6 = 65 + rand() % (91 - 65); int nomAux7 = 65 + rand() % (91 - 65);
+		int nomAux8 = 65 + rand() % (91 - 65); int nomAux9 = 65 + rand() % (91 - 65);
+
+		Archivo_T << "T" + to_string(1 + rand() % (100000 + 1 - 1)) << "," << to_string(18 + rand() % (50 + 1 - 18))
+			<< "," << (char)TChar(nomAux7) << (char)TChar(nomAux8) << (char)TChar(nomAux9) << to_string(100 + rand() % (999 + 1 - 100))
+			<< "," << to_string(1 + rand() % (1 + 1 - 60)) << "," << to_string(1 + rand() % (3 + 1 - 1)) << "," << to_string(10 + rand() % (120 + 1 - 10))
+			<< "," << (char)TChar(nomAux4) << (char)TChar(nomAux5) << (char)TChar(nomAux6) << "," << to_string(1 + rand() % (2 + 1 - 1))
+			<< "," << to_string(1 + rand() % (3 + 1 - 1)) << endl;
+	}
+
+	Archivo_T.close();
+}
+
+void Elementos()
+{
+	ElementosU();
+	ElementosT();
+}
+
+
+class RegistroU
+{
+public:
+	string nom;
+	int eda;
+	int dur;
+	int tip;
+	int prec;
+	string rpar;
+	string rlleg;
+	int ubicom;
+	int ratin;
+
+	RegistroU(string nom = 0, int eda = 0, int dur = 0, int tip = 0, int prec = 0,
+		string rpar = 0, string rlleg = 0, int ubicom = 0, int ratin = 0) :
+		nom(nom), eda(eda), dur(dur), tip(tip), prec(prec), rpar(rpar),
+		rlleg(rlleg), ubicom(ubicom), ratin(ratin) {}
+
+	string ToString() {
+		return "------------------------------------\nNombre: " +
+			nom + "\nEdad: " + to_string(eda) + "\nDuracion: " +
+			to_string(dur) + "\nTipo: " + to_string(tip) + "\nPrecio: " +
+			to_string(prec) + "\nRuta Partida: " + rpar + "\nRuta Llegada: " + rlleg +
+			"\nUbicacion Compartida: " + to_string(ubicom) + "\nRating: " + to_string(ratin) + "\n";
+	}
+};
+
+struct TestListaUsuarios
+{
+	string nom;
+	int eda;
+	int dur;
+	int tip;
+	int prec;
+	string rpar;
+	string rlleg;
+	int ubicom;
+	int ratin;
+};
+
+class TestUsuarios
+{
+	ListaDoblementeEnlazada::Lista<TestListaUsuarios> ListaUsuarios;
+	HashTable::HTable HTU;
+	TestListaUsuarios datosLisUsuarios;
+	string nom, eda, dur, tip, prec, rpar, rlleg, ubicom, ratin;
+	ifstream archivoU;
+	ofstream archivo;
+	vector<RegistroU> registroUsuarios;
+	vector<int> edadUsuarios;
+	vector<int> tarifasUsuarios;
+	vector<int> ratingUsuarios;
+	vector<int> duracionUsuarios;
+	vector<string> nombreUsuarios;
+
+	//ListaDoblementeEnlazada::Lista<int> Prueba;
+	//ListaDoblementeEnlazada::Lista<RegistroU> listaUsuarios;
+
+public:
+	TestUsuarios() {}
+
+	void insertarLista(int n)
+	{
+		archivoU.open("usuarios.csv");
+		do
+		{
+			getline(archivoU, nom, ',');
+
+
+			getline(archivoU, eda, ',');
+			stringstream edad_aux(eda);
+			int _edad = 0;
+			edad_aux >> _edad;
+
+			getline(archivoU, dur, ',');
+			stringstream duracion_aux(dur);
+			int _duracion = 0;
+			duracion_aux >> _duracion;
+
+			getline(archivoU, tip, ',');
+			stringstream tipo_aux(tip);
+			int _tipo = 0;
+			tipo_aux >> _tipo;
+
+			getline(archivoU, prec, ',');
+			stringstream precio_aux(prec);
+			int _precio = 0;
+			precio_aux >> _precio;
+
+
+			getline(archivoU, rpar, ',');
+			getline(archivoU, rlleg, ',');
+
+
+			getline(archivoU, ubicom, ',');
+			stringstream ubicompartida_aux(ubicom);
+			int _ubicompartida = 0;
+			ubicompartida_aux >> _ubicompartida;
+
+			getline(archivoU, ratin);
+			stringstream rating_aux(ratin);
+			int _rating = 0;
+			rating_aux >> _rating;
+
+			datosLisUsuarios.nom = nom;
+			datosLisUsuarios.eda = _edad;
+			datosLisUsuarios.dur = _duracion;
+			datosLisUsuarios.tip = _tipo;
+			datosLisUsuarios.prec = _precio;
+			datosLisUsuarios.rpar = rpar;
+			datosLisUsuarios.rlleg = rlleg;
+			datosLisUsuarios.ubicom = _ubicompartida;
+			datosLisUsuarios.ratin = _rating;
+
+			edadUsuarios.push_back(_edad);
+			tarifasUsuarios.push_back(_precio);
+			ratingUsuarios.push_back(_rating);
+			nombreUsuarios.push_back(nom);
+			duracionUsuarios.push_back(_duracion);
+
+			ListaUsuarios.push_back(datosLisUsuarios);
+			HTU.add(_precio, _edad);
+
+			//listaUsuarios.push_back(RegistroU(nom, _edad, _duracion, _tipo, _precio, rpar, rlleg, _ubicompartida, _rating));
+			n--;
+		} while (n != 0);
+		archivoU.close();
+	}
+
+	void mayorEdad(int n)
+	{
+		int mayor = 0;
+
+		for (size_t i = 0; i < n; i++)
+		{
+			if (edadUsuarios[i] > mayor)
+			{
+				mayor = edadUsuarios[i];
+			}
+		}
+		cout << "La mayor edad de los usuarios seleccionados es " << mayor << endl;
+	}
+
+	void promedio(int n)
+	{
+		int promedio = 0;
+		int aux = 0;
+		for (size_t i = 0; i < n; i++)
+		{
+			aux += tarifasUsuarios[i];
+		}
+
+		promedio = aux / n;
+		cout << "El promedio de tarifas de usuarios seleccionados es " << promedio << "\n";
+	}
+
+	void descuentos(int n)
+	{
+		//precios
+		//rating
+		int raux = 0;
+		int paux = 0;
+		for (size_t i = 0; i < n; i++)
+		{
+			switch (ratingUsuarios[i]) {
+			case 1:
+				raux = 5;
+				break;
+			case 2:
+				raux = 10;
+				break;
+			case 3:
+				raux = 15;
+				break;
+			}
+
+			paux = tarifasUsuarios[i] * raux / 100;
+			tarifasUsuarios[i] -= paux;
+			cout << nombreUsuarios[i] << ": " << tarifasUsuarios[i] << " (con un " << raux << "% de descuento)" << endl << endl;
+		}
+	}
+
+	void Comparativa(int n, int t1, int t2) {
+
+		cout << "Duracion de " << nombreUsuarios[t1] << ": " << duracionUsuarios[t1];
+		cout << "\nDuracion de " << nombreUsuarios[t2] << ": " << duracionUsuarios[t2];
+		int diferencia;
+		if (t1 < t2) {
+			diferencia = duracionUsuarios[t2] - duracionUsuarios[t1];
+		}
+		else if (t2 < t1) {
+			diferencia = duracionUsuarios[t1] - duracionUsuarios[t2];
+		}
+		else {
+			diferencia = 0;
+		}
+
+		cout << "\n\nDiferencia de " << diferencia << " minutos\n\n";
+	}
+
+	string imprimir(long i)
+	{
+		return registroUsuarios[i].ToString();
+	}
+
+	void imprimirLista()
+	{
+		system("cls");
+
+		cout << "\t\t\t\t ---------------------------------" << endl;
+		cout << "\t\t\t\t|        LISTA  DE USUARIOS      |" << endl;
+		cout << "\t\t\t\t ---------------------------------" << endl;
+		ListaUsuarios.print([](TestListaUsuarios u) { cout
+			<< "Nombre: " << u.nom << endl
+			<< "Edad: " << u.eda << endl
+			<< "Duracion: " << u.dur << endl
+			<< "Tipo: " << u.tip << endl
+			<< "Precio: " << u.prec << endl
+			<< "Ruta Partida: " << u.rpar << endl
+			<< "Ruta Llegada: " << u.rlleg << endl
+			<< "Ubicacion Compartida: " << u.ubicom << endl
+			<< "Puntuaciones: " << u.ratin << "\n-------------------------------------\n\n"
+			; });
+		cout << endl;
+	}
+
+	void pruebaHT()
+	{
+		HTU.display();
+	}
+};
+
+struct TestListaTaxistas
+{
+	string nombre;
+	int edad;
+	string placa;
+	int duracion;
+	int tipo;
+	int precio;
+	string ruta;
+	int ubicompartida;
+	int rating;
+};
+
+class RegistroT
+{
+public:
+
+	string nombre;
+	int edad;
+	string placa;
+	int duracion;
+	int tipo;
+	int precio;
+	string ruta;
+	int ubicompartida;
+	int rating;
+	RegistroT(string nombre = 0, int edad = 0, string placa = 0, int duracion = 0, int tipo = 0, int precio = 0,
+		string ruta = 0, int ubicompartida = 0, int rating = 0) :
+		nombre(nombre), edad(edad), placa(placa), duracion(duracion), tipo(tipo), precio(precio), ruta(ruta), ubicompartida(ubicompartida), rating(rating) {}
+
+	string ToString() {
+		return  "------------------------------------\nNombre: " + nombre + "\nEdad : " + to_string(edad) + "\nPlaca : " + placa
+			+ "\nDuracion : " + to_string(duracion) + "\nTipo : " + to_string(tipo) + "\nPrecio : " + to_string(precio) + "\nRuta: "
+			+ ruta + "\nUbicacion Compartida: " + to_string(ubicompartida) + "\nRating: " + to_string(rating) + "\n";
+	}
+};
+
+
+class TestTaxistas
+{
+	ListaDoblementeEnlazada::Lista<TestListaTaxistas> ListaTaxistas;
+	HashTable::HTable HTT;
+	TestListaTaxistas datosLisTaxistas;
+
+	ListaPrueba::Node<int>* NPrueba = nullptr;
+
+	vector<string> Vnom; vector<string> Vruta; vector<string> Vplaca;
+
+	vector<int> Vedad; vector<int> Vdur; vector<int> Vtip; vector<int> Vprec; vector<int> Vubicom; vector<int> Vratin;
+
+
+	vector<RegistroT> registroTaxistas;
+	string nombre, edad, placa, duracion, tipo, precio, ruta, ubicompartida, rating;
+	ifstream archivoT;
+	ofstream archivo;
+	//ArbolRojoNegro::RBTree tree;
+
+public:
+
+	TestTaxistas() {}
+
+	void insertarLista(int n)
+	{
+		archivoT.open("taxistas.csv");
+		do
+		{
+			getline(archivoT, nombre, ',');
+
+
+			getline(archivoT, edad, ',');
+			stringstream edad_aux(edad);
+			int _edad = 0;
+			edad_aux >> _edad;
+
+			getline(archivoT, placa, ',');
+
+
+			getline(archivoT, duracion, ',');
+			stringstream duracion_aux(duracion);
+			int _duracion = 0;
+			duracion_aux >> _duracion;
+
+			getline(archivoT, tipo, ',');
+			stringstream tipo_aux(tipo);
+			int _tipo = 0;
+			tipo_aux >> _tipo;
+
+			getline(archivoT, precio, ',');
+			stringstream precio_aux(precio);
+			int _precio = 0;
+			precio_aux >> _precio;
+
+
+			getline(archivoT, ruta, ',');
+
+
+			getline(archivoT, ubicompartida, ',');
+			stringstream ubicompartida_aux(ubicompartida);
+			int _ubicompartida = 0;
+			ubicompartida_aux >> _ubicompartida;
+
+			getline(archivoT, rating);
+			stringstream rating_aux(rating);
+			int _rating = 0;
+			rating_aux >> _rating;
+
+			datosLisTaxistas.nombre = nombre;
+			datosLisTaxistas.edad = _edad;
+			datosLisTaxistas.placa = placa;
+			datosLisTaxistas.duracion = _duracion;
+			datosLisTaxistas.tipo = _tipo;
+			datosLisTaxistas.precio = _precio;
+			datosLisTaxistas.ruta = ruta;
+			datosLisTaxistas.ubicompartida = _ubicompartida;
+			datosLisTaxistas.rating = _rating;
+
+			push(&NPrueba, _edad);
+
+			ListaTaxistas.push_back(datosLisTaxistas);
+			HTT.add(_rating, _edad);
+
+			Vnom.push_back(nombre); Vedad.push_back(_edad); Vplaca.push_back(placa); Vdur.push_back(_duracion); Vtip.push_back(_tipo); Vprec.push_back(_precio);
+			Vruta.push_back(ruta); Vubicom.push_back(_ubicompartida); Vratin.push_back(_rating);
+
+			//registroTaxistas.push_back(RegistroT(nombre, _edad, placa, _duracion, _tipo, _precio, ruta, _ubicompartida, _rating));
+			n--;
+		} while (n != 0);
+	}
+
+	void menorPrecio(int n)
+	{
+		int menor = 999;
+
+		for (size_t i = 0; i < n; i++)
+		{
+			if (Vprec[i] < menor)
+			{
+				menor = Vprec[i];
+			}
+		}
+		cout << "La menor tarifa de los taxistas seleccionados es " << menor << endl;
+	}
+
+	void repeticion(int pos, int n)
+	{
+		string aux;
+
+		for (size_t i = 0; i < n; i++)
+		{
+			if (Vplaca[i] == Vplaca[pos]) {
+				aux = "si";
+			}
+			else {
+				aux = "no";
+			}
+		}
+
+		cout << "La placa " << Vplaca[pos] << " de los " << n << " taxistas seleccionados " << aux << " se encuentra repetida ";
+
+	}
+
+	void imprimirLista()
+	{
+		system("cls");
+
+		cout << "\t\t\t\t ---------------------------------" << endl;
+		cout << "\t\t\t\t|        LISTA DE TAXISTAS       |" << endl;
+		cout << "\t\t\t\t ---------------------------------" << endl;
+		ListaTaxistas.print([](TestListaTaxistas t) { cout
+			<< "Nombre: " << t.nombre << endl
+			<< "Edad: " << t.edad << endl
+			<< "Placa: " << t.placa << endl
+			<< "Duracion: " << t.duracion << endl
+			<< "Tipo: " << t.tipo << endl
+			<< "Precio: " << t.precio << endl
+			<< "Ruta: " << t.ruta << endl
+			<< "Ubicacion Compartida: " << t.ubicompartida << endl
+			<< "Puntuaciones: " << t.rating << "\n-------------------------------------\n\n"
+			; });
+		cout << endl;
+	}
+
+	string imprimir(long i)
+	{
+		return registroTaxistas[i].ToString();
+	}
+
+	void pruebaHTT()
+	{
+		HTT.display();
+	}
+	/*
+	void pruebaBT(int n)
+	{
+
+
+		BArbol::BTree BarbolTaxista(1);
+
+		for (size_t i = 0; i < n; i++) {
+			BarbolTaxista.insert(Vedad(i);
+		}
+
+		BarbolTaxista.traverse();
+	}
+	*/
+};
+
+void menu()
+{
+	TestUsuarios* TU;
+	TU = new TestUsuarios;
+	TestTaxistas* TT;
+	TT = new TestTaxistas;
+	int tamanioListaU, tamanioListaT;
+	int tamanioHTU, tamanioHTT;
+	int opcion;  int op; int ed; int htop;  int es; int opK; int opR;
+	int U1, U2;
+	int T;
+	cout << "\t\t\t\t -------------------------------------------------------" << endl;
+	cout << "\t\t\t\t|                   MENU DE OPCIONES                   |" << endl;
+	cout << "\t\t\t\t|  -------------------------------------------------   |" << endl;
+	cout << "\t\t\t\t|                                                      |" << endl;
+	cout << "\t\t\t\t| [1] Menu de estructuras vistas en clase              |" << endl;
+	cout << "\t\t\t\t|                                                      |" << endl;
+	cout << "\t\t\t\t| [2] Menu de estructuras investigadas                 |" << endl;
+	cout << "\t\t\t\t|                                                      |" << endl;
+	cout << "\t\t\t\t| [3] Ordenamientos Avanzados                          |" << endl;
+	cout << "\t\t\t\t|                                                      |" << endl;
+	cout << "\t\t\t\t| [4] Salir                                            |" << endl;
+	cout << "\t\t\t\t|                                                      |" << endl;
+	cout << "\t\t\t\t -------------------------------------------------------" << endl;
+
+	cout << "\t\t\t\t << Ingrese opcion : " ;
+
+	do {
+		cin >> opcion;
+	} while (opcion > 4);
+
+	switch (opcion) {
+	case 1:
+		system("cls");
+		cout << "\t\t\t\t -------------------------------------------------------" << endl;
+		cout << "\t\t\t\t|         MENU DE ESTRUCTURAS VISTAS EN CLASE          |" << endl;
+		cout << "\t\t\t\t|  ------------------------------------------------    |" << endl;
+		cout << "\t\t\t\t|                                                      |" << endl;
+		cout << "\t\t\t\t| [1] Lista Doblemente enlazada                        |" << endl;
+		cout << "\t\t\t\t|                                                      |" << endl;
+		cout << "\t\t\t\t| [2] Hash Table                                       |" << endl;
+		cout << "\t\t\t\t|                                                      |" << endl;
+		cout << "\t\t\t\t| [3] Regresar                                         |" << endl;
+		cout << "\t\t\t\t|                                                      |" << endl;
+		cout << "\t\t\t\t -------------------------------------------------------" << endl;
+
+		cout << "\t\t\t\t << Ingrese opcion : ";
+
+		do {
+			cin >> op;
+		} while (op > 3);
+
+		switch (op)
+		{
+		case 1:
+			system("cls");
+			cout << "\t\t\t\t ---------------------------------" << endl;
+			cout << "\t\t\t\t|         MENU DE LISTAS          |" << endl;
+			cout << "\t\t\t\t|  -----------------------------  |" << endl;
+			cout << "\t\t\t\t|                                 |" << endl;
+			cout << "\t\t\t\t| [1] Lista de Usuarios           |" << endl;
+			cout << "\t\t\t\t|                                 |" << endl;
+			cout << "\t\t\t\t| [2] Lista de Taxistas           |" << endl;
+			cout << "\t\t\t\t|                                 |" << endl;
+			cout << "\t\t\t\t| [3] Menu                        |" << endl;
+			cout << "\t\t\t\t|                                 |" << endl;
+			cout << "\t\t\t\t --------------------------------- " << endl;
+
+			cout << "\t\t\t\t << Ingrese opcion : ";
+			cin >> ed;
+			switch (ed)
+			{
+			case 1:
+				system("cls");
+
+				cout << "\t\t\t\t ---------------------------------" << endl;
+				cout << "\t\t\t\t|    TAMANIO DE LISTA USUARIOS    |" << endl;
+				cout << "\t\t\t\t ---------------------------------" << endl;
+				cout << "\t\t\t\t  "; cin >> tamanioListaU;
+				TU->insertarLista(tamanioListaU);
+				system("cls");
+				cout << "\t\t\t\t ------------------------------------------------ " << endl;
+				cout << "\t\t\t\t|                       METODOS                   |" << endl;
+				cout << "\t\t\t\t|  --------------------------------------------   |" << endl;
+				cout << "\t\t\t\t|                                                 |" << endl;
+				cout << "\t\t\t\t| [1] Mostrar Lista                               |" << endl;
+				cout << "\t\t\t\t|                                                 |" << endl;
+				cout << "\t\t\t\t| [2] Buscar mayor edad                           |" << endl;
+				cout << "\t\t\t\t|                                                 |" << endl;
+				cout << "\t\t\t\t| [3] Obtener promedio de tarifas                 |" << endl;
+				cout << "\t\t\t\t|                                                 |" << endl;
+				cout << "\t\t\t\t| [4] Mostrar tarifas con dscto. por valoracion   |" << endl;
+				cout << "\t\t\t\t|                                                 |" << endl;
+				cout << "\t\t\t\t| [5] Comparar tiempo de las rutas                |" << endl;
+				cout << "\t\t\t\t|                                                 |" << endl;
+				cout << "\t\t\t\t| [6] Menu                                        |" << endl;
+				cout << "\t\t\t\t|                                                 |" << endl;
+				cout << "\t\t\t\t ------------------------------------------------ " << endl;
+
+				do {
+					cout <<"\t\t\t\t << Opcion :  "; cin >> opK;
+				} while (opK > 6);
+
+				switch (opK) {
+				case 1:
+					system("cls");
+					TU->imprimirLista();
+					system("pause");
+					system("cls");
+					menu();
+					break;
+				case 2:
+					TU->mayorEdad(tamanioListaU);
+					system("pause");
+					system("cls");
+					menu();
+					break;
+
+				case 3:
+					TU->promedio(tamanioListaU);
+					system("pause");
+					system("cls");
+					menu();
+					break;
+
+				case 4:
+					TU->descuentos(tamanioListaU);
+					system("pause");
+					system("cls");
+					menu();
+					break;
+
+				case 5:
+					system("cls");
+					cout << "\tDe los " << tamanioListaU << " usuarios seleccionados, ingresar el numero de posicion de 2 usuarios distintos";
+					cout << "\n\nUsuario 01: "; cin >> U1;
+					cout << "\nUsuario 02: "; cin >> U2;
+					TU->Comparativa(tamanioListaU, U1, U2);
+					system("pause");
+					system("cls");
+					menu();
+					break;
+
+				case 6:
+					system("cls");
+					menu();
+					break;
+				}
+				break;
+			case 2:
+				system("cls");
+
+				cout << "\t\t\t\t ---------------------------------" << endl;
+				cout << "\t\t\t\t|    TAMANIO DE LISTA TAXISTAS      |" << endl;
+				cout << "\t\t\t\t ---------------------------------" << endl;
+				cout << "\t\t\t\t  ";cin>> tamanioListaT;
+				TT->insertarLista(tamanioListaT);
+				system("cls");
+				cout << "\t\t\t\t ------------------------------------------------ " << endl;
+				cout << "\t\t\t\t|                       METODOS                   |" << endl;
+				cout << "\t\t\t\t|  --------------------------------------------   |" << endl;
+				cout << "\t\t\t\t|                                                 |" << endl;
+				cout << "\t\t\t\t| [1] Mostrar Lista                               |" << endl;
+				cout << "\t\t\t\t|                                                 |" << endl;
+				cout << "\t\t\t\t| [2] Buscar menor tarifa                         |" << endl;
+				cout << "\t\t\t\t|                                                 |" << endl;
+				cout << "\t\t\t\t| [3] Filtrar ubicaciones compartidas             |" << endl;
+				cout << "\t\t\t\t|                                                 |" << endl;
+				cout << "\t\t\t\t| [4] Buscar repeticiones de la misma placa       |" << endl;
+				cout << "\t\t\t\t|                                                 |" << endl;
+				cout << "\t\t\t\t| [5] Menu                                        |" << endl;
+				cout << "\t\t\t\t|                                                 |" << endl;
+				cout << "\t\t\t\t ------------------------------------------------ " << endl;
+
+				do {
+					cout << "\t\t\t\t << Opcion :  "; cin >> opR;
+				} while (opR > 5);
+
+				switch (opR)
+				{
+				case 1:
+					system("cls");
+					TT->imprimirLista();
+					system("pause");
+					system("cls");
+					menu();
+				case 2:
+					TT->menorPrecio(tamanioListaT);
+					system("pause");
+					system("cls");
+					menu();
+					break;
+				case 3:
+
+					system("pause");
+					system("cls");
+					menu();
+					break;
+				case 4:
+					system("cls");
+					cout << "\tDe los " << tamanioListaT << " taxistas seleccionados, ingresar el numero de posicion de un taxista\n\n";
+					cin >> T;
+					cout << endl;
+					TT->repeticion(T, tamanioListaT);
+					cout << endl << endl;
+					system("pause");
+					system("cls");
+					menu();
+					break;
+				case 5:
+					system("cls");
+					menu();
+					break;
+				}
+
+				//TT->pruebaLD();
+				//cout << endl << endl;
+				system("pause");
+				system("cls");
+				menu();
+				break;
+			case 3:
+				system("cls");
+				menu();
+				break;
+			}
+
+		case 2:
+			system("cls");
+			cout << "\t\t\t\t --------------------------------- " << endl;
+			cout << "\t\t\t\t|        MENU DE HASH TABLE       |" << endl;
+			cout << "\t\t\t\t|  -----------------------------  |" << endl;
+			cout << "\t\t\t\t|                                 |" << endl;
+			cout << "\t\t\t\t| [1] Hash Table de Usuarios      |" << endl;
+			cout << "\t\t\t\t|                                 |" << endl;
+			cout << "\t\t\t\t| [2] Hash Table de Taxistas      |" << endl;
+			cout << "\t\t\t\t|                                 |" << endl;
+			cout << "\t\t\t\t| [3] Menu                        |" << endl;
+			cout << "\t\t\t\t|                                 |" << endl;
+			cout << "\t\t\t\t --------------------------------- " << endl;
+
+			cout << "\t\t\t\t << Ingrese opcion : ";
+			cin >> htop;
+			switch (htop)
+			{
+			case 1:
+				system("cls");
+
+				cout << "\t\t\t\t ---------------------------------" << endl;
+				cout << "\t\t\t\t|    TAMANIO DE HT USUARIOS      |" << endl;
+				cout << "\t\t\t\t ---------------------------------" << endl;
+				cin >> tamanioHTU;
+
+				system("cls");
+				cout << "\t\t\t\t ---------------------------------" << endl;
+				cout << "\t\t\t\t|        HT PRECIO - EDAD        |" << endl;
+				cout << "\t\t\t\t ---------------------------------" << endl;
+				TU->insertarLista(tamanioHTU);
+				TU->pruebaHT();
+				system("pause");
+				system("cls");
+				break;
+			case 2:
+				system("cls");
+
+				cout << "\t\t\t\t ---------------------------------" << endl;
+				cout << "\t\t\t\t|    TAMANIO DE HT TAXISTAS      |" << endl;
+				cout << "\t\t\t\t ---------------------------------" << endl;
+				cin >> tamanioHTT;
+
+				system("cls");
+				cout << "\t\t\t\t ---------------------------------" << endl;
+				cout << "\t\t\t\t|        HT RATING - EDAD        |" << endl;
+				cout << "\t\t\t\t ---------------------------------" << endl;
+				TT->insertarLista(tamanioHTT);
+				TT->pruebaHTT();
+				system("pause");
+				system("cls");
+				break;
+			case 3:
+				system("pause");
+				system("cls");
+				return menu();
+				break;
+			}
+
+		case 3:
+			system("cls");
+			menu();
+			break;
+		}
+		break;
+	case 2:
+		system("cls");
+		cout << "\t\t\t\t --------------------------------------------------------" << endl;
+		cout << "\t\t\t\t|             MENU DE ESTRUCTURAS INVESTIGADAS          |" << endl;
+		cout << "\t\t\t\t|        -----------------------------                  |" << endl;
+		cout << "\t\t\t\t|                                                       |" << endl;
+		cout << "\t\t\t\t| [1] Estructuras B-Tree                                |" << endl;
+		cout << "\t\t\t\t|                                                       |" << endl;
+		cout << "\t\t\t\t| [2] Estructuras Grafos                                |" << endl;
+		cout << "\t\t\t\t|                                                       |" << endl;
+		cout << "\t\t\t\t| [3] Estructuras Arboles Rojo y Negro                  |" << endl;
+		cout << "\t\t\t\t|                                                       |" << endl;
+		cout << "\t\t\t\t| [4] Salir                                             |" << endl;
+		cout << "\t\t\t\t|                                                       |" << endl;
+		cout << "\t\t\t\t --------------------------------------------------------" << endl;
+		cout << "\t\t\t\t << Ingrese opcion : ";
+		cin >> es;
+		switch (es)
+		{
+		case 1:
+			system("cls");
+			cout << "\t\t\t\t ---------------------------------" << endl;
+			cout << "\t\t\t\t|      BTREE - EDAD TAXISTA      |" << endl;
+			cout << "\t\t\t\t ---------------------------------" << endl;
+			TT->insertarLista(10);
+			//TT->pruebaBT();
+			break;
+
+		case 4:
+			system("cls");
+			menu();
+		default:
+			break;
+		}
+		break;
+	case 3:
+
+		system("pause");
+		system("cls");
+		return menu();
+		break;
+	case 4:
+		system("cls");
+		exit(0);
+		break;
+	}
+}
+
+int main()
+{
+	Elementos();
+	menu();
+	return 0;
+}
+
